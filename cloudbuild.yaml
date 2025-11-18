@@ -1,16 +1,16 @@
 steps:
-  # Langkah 1: Build Docker Image (Path ke Dockerfile sekarang di root)
+  # Langkah 1: Build Docker Image (Koreksi Region ke AUSTRALIA)
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build', 
-    '-t', 'asia-southeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-images/aircraft-backend:$COMMIT_SHA', 
-    '-f', 'Dockerfile', # Hapus 'backend/' karena file ada di root
+    '-t', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-images/aircraft-backend:$COMMIT_SHA', 
+    '-f', 'Dockerfile', 
     '.' 
   ]
 
-# Langkah 2: Push Image ke Artifact Registry
+# Langkah 2: Push Image ke Artifact Registry (Koreksi Region ke AUSTRALIA)
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'asia-southeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-images/aircraft-backend:$COMMIT_SHA']
+  args: ['push', 'australia-southeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-images/aircraft-backend:$COMMIT_SHA']
 
 options:
   logging: CLOUD_LOGGING_ONLY
