@@ -42,9 +42,20 @@ app.get('/plan', async (req, res) => {
   // Kirim data rute kembali ke frontend Anda
   res.json(response.data);
  } catch (error) {
-  console.error("Gagal fetch rute:", error);
-  res.status(500).send('Gagal mengambil rute dari server eksternal');
- }
+    console.error("Gagal fetch rute:", error);
+
+    // --- LOGIKA PERBAIKAN ERROR ---
+    if (axios.isAxiosError(error) && error.response) {
+        // Jika error dari Axios dan ada respons dari server eksternal
+        return res.status(error.response.status).send({
+            message: `Gagal dari OzRunways (${error.response.status}): ${error.response.statusText}`,
+            detail: error.response.data
+        });
+    }
+
+    // Default error handling jika bukan error HTTP
+    res.status(500).send('Gagal mengambil rute dari server eksternal');
+}
 });
 
 // --- Setup WebSocket Server ---
