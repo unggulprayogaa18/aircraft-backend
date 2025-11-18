@@ -1,0 +1,17 @@
+steps:
+  # Langkah 1: Build Docker Image (Path ke Dockerfile relatif dari root repo)
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'build', 
+    '-t', 'asia-southeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-images/aircraft-backend:$COMMIT_SHA', 
+    '-f', 'backend/Dockerfile', # Menentukan lokasi Dockerfile di subfolder
+    '.' # Context build adalah root repository
+  ]
+
+# Langkah 2: Push Image ke Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'asia-southeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-images/aircraft-backend:$COMMIT_SHA']
+
+options:
+  # Baris ini yang mengatasi error logging Service Account
+  logging: CLOUD_LOGGING_ONLY
