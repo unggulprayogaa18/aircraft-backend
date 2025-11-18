@@ -1,0 +1,28 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --loader ts-node/esm src/server.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "ws": "^8.17.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
+    "@types/node": "^20.14.2",
+    "@types/ws": "^8.5.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
