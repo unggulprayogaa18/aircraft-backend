@@ -1,10 +1,10 @@
 steps:
-  # Langkah 1: Build Docker Image
+  # Langkah 1: Build Docker Image (Path ke Dockerfile sekarang di root)
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build', 
     '-t', 'asia-southeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-images/aircraft-backend:$COMMIT_SHA', 
-    '-f', 'Dockerfile', # Hapus path 'backend/' karena sudah diatur di GUI
+    '-f', 'Dockerfile', # Hapus 'backend/' karena file ada di root
     '.' 
   ]
 
