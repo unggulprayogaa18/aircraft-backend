@@ -7,20 +7,17 @@ WORKDIR /app
 # 3. Copy file package.json dan package-lock.json
 COPY package*.json ./
 
-# 4. Install dependencies
+# 4. Install dependencies (NodeJS akan membuat node_modules yang bersih di sini)
 RUN npm install
 
-# 5. BERIKAN IZIN EKSEKUSI KE TSC
-RUN chmod +x /app/node_modules/.bin/tsc 
+# 5. Copy seluruh kode source code (kecuali yang ada di .dockerignore)
+COPY . . 
 
-# 6. Copy seluruh kode source code backend
-COPY . .
+# 6. Build TypeScript menjadi JavaScript (folder dist)
+RUN npm run build 
 
-# 7. Build TypeScript menjadi JavaScript (folder dist)
-RUN npm run build
-
-# 8. Cloud Run akan memberikan PORT lewat environment variable.
+# 7. Cloud Run akan memberikan PORT lewat environment variable.
 EXPOSE 8080
 
-# 9. Jalankan server
+# 8. Jalankan server
 CMD ["npm", "start"]
