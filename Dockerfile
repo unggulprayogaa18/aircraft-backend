@@ -5,21 +5,22 @@ FROM node:18-alpine
 WORKDIR /app
 
 # 3. Copy file package.json dan package-lock.json
-# (Docker akan mencari file ini di folder 'backend' karena setting context nanti)
 COPY package*.json ./
 
 # 4. Install dependencies
 RUN npm install
 
-# 5. Copy seluruh kode source code backend
+# 5. BERIKAN IZIN EKSEKUSI KE TSC
+RUN chmod +x /app/node_modules/.bin/tsc 
+
+# 6. Copy seluruh kode source code backend
 COPY . .
 
-# 6. Build TypeScript menjadi JavaScript (folder dist)
+# 7. Build TypeScript menjadi JavaScript (folder dist)
 RUN npm run build
 
-# 7. Cloud Run akan memberikan PORT lewat environment variable.
-# Code server.ts kamu sudah siap menerima process.env.PORT
+# 8. Cloud Run akan memberikan PORT lewat environment variable.
 EXPOSE 8080
 
-# 8. Jalankan server
+# 9. Jalankan server
 CMD ["npm", "start"]
