@@ -1,18 +1,15 @@
-// src/server.ts
-
 import { WebSocketServer, WebSocket } from 'ws';
 import { fetchAircraftData } from './poller.js';
-import express from 'express'; // BARU
-import http from 'http';       // BARU
-import cors from 'cors';       // BARU
-import axios from 'axios';     // BARU
+import express from 'express'; 
+import http from 'http';      
+import cors from 'cors';      
+import axios from 'axios';    
 
 // --- Konfigurasi ---
-// Render akan menyuntikkan process.env.PORT
 const PORT = process.env.PORT || 8080;
 const POLLING_INTERVAL = 5000; // 5 detik
 const API_PLAN_URL = "https://tx.ozrunways.com/tx/plan?key=";
-const API_BROWSER_HEADERS = { // (Kita perlukan ini untuk axios)
+const API_BROWSER_HEADERS = {
  "User-Agent": "Mozilla/5.0",
  "Referer": "https://tx.ozrunways.com/",
  "Accept": "application/json, text/javascript, */*; q=0.01",
@@ -21,13 +18,12 @@ const API_BROWSER_HEADERS = { // (Kita perlukan ini untuk axios)
 
 // --- Setup Server HTTP Express ---
 const app = express();
-// Izinkan frontend Anda (misal localhost:3000) untuk mengakses backend ini
 app.use(cors()); 
 const server = http.createServer(app);
 
 // --- Endpoint BARU untuk mengambil Rute (Proxy) ---
 app.get('/plan', async (req, res) => {
- const { key } = req.query; // Mengambil 'tk' dari query (cth: /plan?key=abcde)
+ const { key } = req.query; 
 
  if (!key) {
   return res.status(400).send('Parameter "key" (tk) dibutuhkan');
@@ -35,31 +31,36 @@ app.get('/plan', async (req, res) => {
 
  console.log(`[HTTP] Mengambil rute untuk tk: ${key}`);
  try {
-  // Backend Anda memanggil API OzRunways (Server-ke-Server, BEBAS CORS)
+  // PANGGILAN DENGAN TIMEOUT KHUSUS
   const response = await axios.get(`${API_PLAN_URL}${key}`, {
-   headers: API_BROWSER_HEADERS
+   headers: API_BROWSER_HEADERS,
+   timeout: 10000 // Menambahkan timeout 10 detik
   });
-  // Kirim data rute kembali ke frontend Anda
+  
   res.json(response.data);
  } catch (error) {
-    console.error("Gagal fetch rute:", error);
+  console.error("Gagal fetch rute:", error);
 
-    // --- LOGIKA PERBAIKAN ERROR ---
-    if (axios.isAxiosError(error) && error.response) {
-        // Jika error dari Axios dan ada respons dari server eksternal
-        return res.status(error.response.status).send({
-            message: `Gagal dari OzRunways (${error.response.status}): ${error.response.statusText}`,
-            detail: error.response.data
-        });
-    }
+  // LOGIKA PERBAIKAN ERROR 500: Mengembalikan error spesifik dari OzRunways
+  if (axios.isAxiosError(error)) {
+      if (error.response) {
+          // Jika ada respons (misal 404, 500 dari OzRunways)
+          return res.status(error.response.status).send({
+              message: `OzRunways Gagal (${error.response.status}): ${error.response.statusText}`,
+              detail: error.response.data
+          });
+      } else if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+          // TANGANI TIMEOUT/NETWORK ERROR
+          return res.status(504).send('Gateway Timeout: Koneksi ke OzRunways timeout.');
+      }
+  }
 
-    // Default error handling jika bukan error HTTP
-    res.status(500).send('Gagal mengambil rute dari server eksternal');
-}
+  // Default error handling jika bukan error HTTP/Network spesifik
+  res.status(500).send('Gagal mengambil rute dari server eksternal');
+ }
 });
 
 // --- Setup WebSocket Server ---
-// 'Tempelkan' server WebSocket ke server HTTP Express
 const wss = new WebSocketServer({ server });
 
 console.log(`🚀 Server HTTP & WebSocket dimulai di port ${PORT}`);
